@@ -1,23 +1,34 @@
 open System
 open CommandLineParser
+open Days
+open Days.Types
 
 let runDay (day:int) (fileLines: seq<string>) = 
     match day with
     | 1 -> Day1.solve fileLines
-    | _ -> eprintf "Could not find solver for day %d" day
+    | _ -> Defaults.NotImplementedResult
+
+let printResult prefix result = 
+    match result with 
+    | NotImplemented -> 
+        printfn "%s: Not implemented" prefix
+    | Answer ans -> 
+        printfn "%s: %s" prefix ans
 
 [<EntryPoint>]
 let main argv =
-    let result = Array.toList argv |> parse
-    match result with
-    | InvalidCommand -> eprintfn "Invalid command"
+    let cmd = Array.toList argv |> parse
+    match cmd with
+    | InvalidCommand msg -> eprintfn "%s" msg
     | ValidCommand cmd ->
         match cmd.Day with
         | NoDay -> eprintfn "Missing day option (-d)"
         | Day day ->
-            match cmd.Input with
-            | NoInput -> eprintfn "Missing input option (-i)"
-            | Input filename -> 
-                IO.File.ReadLines filename |> runDay day 
+            match cmd.FilePath with
+            | NoFilePath -> eprintfn "Missing input option (-i)"
+            | FilePath path -> 
+                let (partOne, partTwo) = IO.File.ReadLines path |> runDay day
+                printResult "Part one" partOne
+                printResult "Part two" partTwo  
     0 // return an integer exit code
 
