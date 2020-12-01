@@ -2,7 +2,7 @@ namespace Days.Types
 
 type PartResult =
     | NotImplemented
-    | Answer of string
+    | Answer of int
 
 type DayResult = PartResult * PartResult
 

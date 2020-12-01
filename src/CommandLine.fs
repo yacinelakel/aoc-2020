@@ -1,5 +1,4 @@
 module CommandLineParser
-
 type DayOption =
     | NoDay
     | Day of int
@@ -16,13 +15,13 @@ type CommandLineResult =
     | ValidCommand of CommandLineOptions
     | InvalidCommand of string
 
-let parse args =
-    let rec parseRec (args: string list) (resultSoFar: CommandLineResult) =
+let parseCommandLine args =
+    let rec parseCommandLineRec (args: string list) (resultSoFar: CommandLineResult) =
         match args with
         | [] -> resultSoFar
         | "-d" :: xs ->
             match xs with
-            | [] -> parseRec xs resultSoFar
+            | [] -> parseCommandLineRec xs resultSoFar
             | dayStr :: xss ->
                 match System.Int32.TryParse dayStr with
                 | true, day ->
@@ -34,11 +33,11 @@ let parse args =
                                   FilePath = NoFilePath }
                         | ValidCommand cmd -> ValidCommand { cmd with Day = Day(int day) }
 
-                    parseRec xss newResult
-                | _ -> parseRec xs resultSoFar
+                    parseCommandLineRec xss newResult
+                | _ -> parseCommandLineRec xs resultSoFar
         | "-i" :: xs ->
             match xs with
-            | [] -> parseRec xs resultSoFar
+            | [] -> parseCommandLineRec xs resultSoFar
             | path :: xss ->
                 let newResult =
                     match resultSoFar with
@@ -48,7 +47,7 @@ let parse args =
                               FilePath = (FilePath path) }
                     | ValidCommand cmd -> ValidCommand { cmd with FilePath = FilePath path }
 
-                parseRec xss newResult
-        | _ :: xs -> parseRec xs resultSoFar
+                parseCommandLineRec xss newResult
+        | _ :: xs -> parseCommandLineRec xs resultSoFar
 
-    parseRec args (InvalidCommand "Missing options")
+    parseCommandLineRec args (InvalidCommand "Missing options")

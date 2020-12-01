@@ -13,11 +13,11 @@ let printResult prefix result =
     | NotImplemented -> 
         printfn "%s: Not implemented" prefix
     | Answer ans -> 
-        printfn "%s: %s" prefix ans
+        printfn "%s: %d" prefix ans
 
 [<EntryPoint>]
 let main argv =
-    let cmd = Array.toList argv |> parse
+    let cmd = Array.toList argv |> parseCommandLine
     match cmd with
     | InvalidCommand msg -> eprintfn "%s" msg
     | ValidCommand cmd ->
