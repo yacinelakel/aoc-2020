@@ -5,6 +5,7 @@ open Days
 let runDay (day:int) (fileLines: seq<string>) = 
     match day with
     | 1 -> Day1.solve fileLines
+    | 2 -> Day2.solve fileLines
     | _ -> (None, None)
 
 let printResult prefix result = 
@@ -13,12 +14,6 @@ let printResult prefix result =
         printfn "%s: Not implemented or found" prefix
     | Some ans -> 
         printfn "%s: %d" prefix ans
-
-
-
-
-
-
 
 [<EntryPoint>]
 let main argv =
