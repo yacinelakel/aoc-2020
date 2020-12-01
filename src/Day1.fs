@@ -1,7 +1,5 @@
 module Days.Day1
 
-open Days.Types
-
 let solve (fileLines: seq<string>) =
 
     let partOne (input) = 
@@ -10,11 +8,11 @@ let solve (fileLines: seq<string>) =
                 | x::_, y::ys -> 
                     match x + y with
                     | 2020 -> 
-                        Answer (x*y)
+                        Some (x*y)
                     | _ -> 
                         partOneRec  l1 ys
                 | _::xs, [] -> partOneRec xs input
-                | _,_ -> NotImplemented
+                | _,_ -> None
         partOneRec input input
 
     let partTwo (input) = 
@@ -23,12 +21,12 @@ let solve (fileLines: seq<string>) =
                     | x::_, y::_, z::zs -> 
                         match x + y + z with
                         | 2020 -> 
-                            Answer (x*y*z)
+                            Some (x*y*z)
                         | _ -> 
                             partTwoRec l1 l2 zs
                     | _::_, _::ys, [] -> partTwoRec l1 ys input 
                     | _::xs, [], _ -> partTwoRec xs input input
-                    | _,_,_ -> NotImplemented
+                    | _,_,_ -> None
         partTwoRec input input input
 
     let parseInput (fileLines: seq<string>) = Seq.map (fun x -> (int x)) fileLines |> Seq.toList

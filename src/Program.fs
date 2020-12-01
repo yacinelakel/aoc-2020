@@ -1,18 +1,17 @@
 open System
 open CommandLineParser
 open Days
-open Days.Types
 
 let runDay (day:int) (fileLines: seq<string>) = 
     match day with
     | 1 -> Day1.solve fileLines
-    | _ -> Defaults.NotImplementedResult
+    | _ -> (None, None)
 
 let printResult prefix result = 
     match result with 
-    | NotImplemented -> 
-        printfn "%s: Not implemented" prefix
-    | Answer ans -> 
+    | None -> 
+        printfn "%s: Not implemented or found" prefix
+    | Some ans -> 
         printfn "%s: %d" prefix ans
 
 [<EntryPoint>]
