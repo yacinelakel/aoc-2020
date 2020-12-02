@@ -7,7 +7,6 @@ type Policy =
       Password: string }
 
 module Day2 =
-    open System.Text.RegularExpressions
     open Days.Core
 
     let solve (fileLines: seq<string>) =

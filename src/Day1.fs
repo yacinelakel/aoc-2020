@@ -1,4 +1,5 @@
 module Days.Day1
+
 open Days.Core
 
 let solve (fileLines: seq<string>) =
@@ -104,7 +105,7 @@ let solve (fileLines: seq<string>) =
         | Some l -> Some(List.fold (*) 1 l)
         | _ -> None
 
-    // I like this best. Clean and consise
+    // I like this best for bruteforcing. Clean and consise
     let partOneAndTwoWithForLoopGenerator input =
         let cprod2 =
             [ for x in input do
@@ -119,48 +120,63 @@ let solve (fileLines: seq<string>) =
 
         let toResult result =
             match result with
-            | Some l -> Some (List.fold (*) 1 l)
+            | Some l -> Some(List.fold (*) 1 l)
             | _ -> None
 
-        (cprod2 |> findMatch |> toResult , cprod3 |> findMatch |> toResult )
+        (cprod2 |> findMatch |> toResult, cprod3 |> findMatch |> toResult)
 
-    // https://en.m.wikipedia.org/wiki/3SUM
-    let threeSum input sum: ((int*int*int) option) =
-        let sortedList = 
-            input 
-            |> List.sort
-        
-        let rec innerloop (a:int) (si:int) (ei:int):((int*int*int) option) =
-                match si < ei with
-                | false -> None
-                | true ->
-                    let b,c = sortedList.[si], sortedList.[ei]
-                    if (a + b + c) = sum then
-                        Some (a,b,c)
-                    else if (a + b + c) > sum then
-                        innerloop a si (ei-1)
-                    else
-                        innerloop a (si+1) ei
-         
-        let rec outerloop i =
-            let cond = (i < (sortedList.Length - 2)) 
-            match cond with
-            | false -> None
-            | true -> 
-                let found = innerloop sortedList.[i] (i+1) (sortedList.Length - 1)
-                match found with
-                | None -> outerloop (i+1) 
-                | Some a ->  Some a
+    // 'Optimal' solutions
+    let partTwoToSum input =
+        let twoSum list sum =
+            // Scan for canidates
+            let rec search s sList =
+                match sList with
+                | [ _ ] | [] -> None
+                | a::rest ->
+                    let b = List.last rest
+                    if (a + b) = s then Some(a, b)
+                    else if (a + b) > s then search s sList.[..(sList.Length - 2)]
+                    else search s rest
 
-        outerloop 0 
+            // input must be sorted
+            list |> List.sort |> search sum 
 
+        match (twoSum input 2020) with
+        | Some (a, b) -> Some(a * b)
+        | None -> None
+
+    // Quadratic solution to 3SUM https://en.m.wikipedia.org/wiki/3SUM
     let partTwoThreeSum input =
+        let threeSum list sum =
+            // Scan for second and third canidate
+            let rec search2 s sList a =
+                match sList with
+                | [ _ ] | [] -> None
+                | b::rest ->
+                    let c = List.last rest
+                    if (a + b + c) = s then Some(a, b, c)
+                    else if (a + b + c) > s then search2 s sList.[..(sList.Length - 2)] a // remove last item
+                    else search2 s rest a // remove first item
+
+            // Choose first element as canidate,
+            // search for solution given that canidate
+            let rec search3 s sList =
+                match sList with
+                | [ _; _ ] | [ _ ] | [] -> None
+                | x :: rest ->
+                    match search2 s sList x with
+                    | None -> search3 s rest
+                    | Some a -> Some a
+
+            // input must be sorted
+            list |> List.sort |> search3 sum
+
         match (threeSum input 2020) with
-        | Some (a,b,c) -> Some (a * b * c)
-        | None -> None     
-            
+        | Some (a, b, c) -> Some(a * b * c)
+        | None -> None
+
 
 
     let input = parseInput (fun x -> (int x)) fileLines
 
-    (partOneWithForLoopGenerators input, partTwoThreeSum input)
+    (partTwoToSum input, partTwoThreeSum input)
