@@ -1,16 +1,41 @@
-module Days.Day2
+namespace Days
+type Policy =
+    { Low: int
+      High: int
+      Char: char
+      Password: string }
 
-let solve (fileLines:seq<string>) =
+module Day2 =
+    open System.Text.RegularExpressions
+    open Days.Core
 
-    let partOne input =
-        None
+    let solve (fileLines: seq<string>) =
+        
+        let partOne input =
+            let valid (p:Policy) = 
+                let occ x = Seq.filter ((=) x) >> Seq.length
+                let occP = p.Password |> occ p.Char
+                occP >= p.Low && occP <= p.High
 
-    let partTwo input =
-        None
-    
-    let parseInput (fileLines) =
-        Seq.map (fun x -> (int x)) fileLines |> Seq.toList
+            Some(input |> List.filter valid |> List.length)
 
-    let input = parseInput fileLines
+        let partTwo input =
+            let valid (p : Policy) = 
+                let hasLow = p.Password.[p.Low - 1] = p.Char
+                let hasHigh = p.Password.[p.High - 1] = p.Char
+                (hasLow || hasHigh) && not (hasLow && hasHigh) 
 
-    (partOne input, partTwo input)
+            Some (input |> List.filter valid |> List.length)
+
+        let parseLine line =
+            match line with
+            | Regex @"(\d+)\-(\d+)\s([a-z]): (.+)" [ l; h; c; p ] ->
+                { Low = (int l)
+                  High = (int h)
+                  Char = (char c)
+                  Password = p }
+            | _ -> failwith "parse error"
+
+        let input = parseInput parseLine fileLines
+
+        (partOne input, partTwo input)

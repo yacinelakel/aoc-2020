@@ -1,4 +1,5 @@
 module Days.Day1
+open Days.Core
 
 let solve (fileLines: seq<string>) =
 
@@ -125,9 +126,7 @@ let solve (fileLines: seq<string>) =
 
 
 
-    let parseInput (fileLines: seq<string>) =
-        Seq.map (fun x -> (int x)) fileLines |> Seq.toList
 
-    let input = parseInput fileLines
+    let input = parseInput (fun x -> (int x)) fileLines
 
     partOneAndTwoWithForLoopGenerator input
