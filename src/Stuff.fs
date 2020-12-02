@@ -31,12 +31,45 @@ module BinarySearchTree =
 
 
 module Graph =
+    //// source: https://github.com/CSBiology/FSharp.FGL/blob/developer/src/FSharp.FGL/Graph.fs
 
-    type Graph =
-        | Node of int * (Graph list)
-        | None
+    ///Labeled vertex
+    type LVertex<'Vertex,'Label> =
+        'Vertex * 'Label
 
-// let rec insertNode (graph: Graph) (value: int) =
+    ///Unlabeled edge
+    type Edge<'Vertex> =
+        'Vertex * 'Vertex
+
+    ///Labeled edge
+    type LEdge<'Vertex,'Edge> =
+        'Vertex * 'Vertex * 'Edge
+
+    ///Tuple list of adjacent vertices and the linking edges
+    type Adj<'Vertex,'Edge> when 'Vertex: comparison =
+        List<'Vertex*'Edge>
+
+    ///Context of a vertice as defined by Martin Erwig. Adjacency of type 'Adj'
+    type Context<'Vertex,'Label,'Edge> when 'Vertex: comparison=
+        Adj<'Vertex,'Edge>*'Vertex*'Label*Adj<'Vertex,'Edge>
+
+    ///Map of adjacent vertices as key and the linking edges as values
+    type MAdj<'Vertex,'Edge> when 'Vertex: comparison =
+        Map<'Vertex,'Edge>
+
+    ///Context of a vertices as defined by Martin Erwig. Adjacency of type 'MAdj'
+    type MContext<'Vertex,'Label,'Edge> when 'Vertex: comparison =
+        MAdj<'Vertex,'Edge> * 'Label * MAdj<'Vertex,'Edge>
+
+    ///Map of Vertices as keys and MContexts as values
+    type Graph<'Vertex,'Label,'Edge> when 'Vertex: comparison =
+        Map<'Vertex, MContext<'Vertex,'Label,'Edge>>
+
+
+
+
+    let empty = Map.empty
+                 
 
 
 

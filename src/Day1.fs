@@ -124,9 +124,43 @@ let solve (fileLines: seq<string>) =
 
         (cprod2 |> findMatch |> toResult , cprod3 |> findMatch |> toResult )
 
+    // https://en.m.wikipedia.org/wiki/3SUM
+    let threeSum input sum: ((int*int*int) option) =
+        let sortedList = 
+            input 
+            |> List.sort
+        
+        let rec innerloop (a:int) (si:int) (ei:int):((int*int*int) option) =
+                match si < ei with
+                | false -> None
+                | true ->
+                    let b,c = sortedList.[si], sortedList.[ei]
+                    if (a + b + c) = sum then
+                        Some (a,b,c)
+                    else if (a + b + c) > sum then
+                        innerloop a si (ei-1)
+                    else
+                        innerloop a (si+1) ei
+         
+        let rec outerloop i =
+            let cond = (i < (sortedList.Length - 2)) 
+            match cond with
+            | false -> None
+            | true -> 
+                let found = innerloop sortedList.[i] (i+1) (sortedList.Length - 1)
+                match found with
+                | None -> outerloop (i+1) 
+                | Some a ->  Some a
 
+        outerloop 0 
+
+    let partTwoThreeSum input =
+        match (threeSum input 2020) with
+        | Some (a,b,c) -> Some (a * b * c)
+        | None -> None     
+            
 
 
     let input = parseInput (fun x -> (int x)) fileLines
 
-    partOneAndTwoWithForLoopGenerator input
+    (partOneWithForLoopGenerators input, partTwoThreeSum input)
