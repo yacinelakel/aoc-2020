@@ -1,4 +1,5 @@
 namespace Days
+
 type Policy =
     { Low: int
       High: int
@@ -10,22 +11,36 @@ module Day2 =
     open Days.Core
 
     let solve (fileLines: seq<string>) =
-        
-        let partOne input =
-            let valid (p:Policy) = 
-                let occ x = Seq.filter ((=) x) >> Seq.length
-                let occP = p.Password |> occ p.Char
-                occP >= p.Low && occP <= p.High
 
-            Some(input |> List.filter valid |> List.length)
+        let isValidPartOne p =
+            let occ x = Seq.filter ((=) x) >> Seq.length
+            let occP = p.Password |> occ p.Char
+            occP >= p.Low && occP <= p.High
 
-        let partTwo input =
-            let valid (p : Policy) = 
-                let hasLow = p.Password.[p.Low - 1] = p.Char
-                let hasHigh = p.Password.[p.High - 1] = p.Char
-                (hasLow || hasHigh) && not (hasLow && hasHigh) 
+        let isValidPartTwo p =
+            let hasLow = p.Password.[p.Low - 1] = p.Char
+            let hasHigh = p.Password.[p.High - 1] = p.Char
+            hasLow <> hasHigh
 
-            Some (input |> List.filter valid |> List.length)
+        let countValidHO pred list =
+            (pred, list) ||> List.filter |> List.length
+
+        let countValidRec pred list =
+            let rec loop l c =
+                match l with
+                | p :: rest ->
+                    match (pred p) with
+                    | true -> loop rest (c + 1)
+                    | false -> loop rest c
+                | [] -> c
+
+            loop list 0
+
+        let solveHO input =
+            (isValidPartOne, input) ||> countValidHO |> Some, (isValidPartTwo, input) ||> countValidHO |> Some
+
+        let solveRec input =
+            (isValidPartOne, input) ||> countValidHO |> Some, (isValidPartTwo, input) ||> countValidHO |> Some
 
         let parseLine line =
             match line with
@@ -36,6 +51,4 @@ module Day2 =
                   Password = p }
             | _ -> failwith "parse error"
 
-        let input = parseInput parseLine fileLines
-
-        (partOne input, partTwo input)
+        fileLines |> parseInput parseLine |> solveHO
