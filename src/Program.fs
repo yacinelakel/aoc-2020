@@ -9,7 +9,7 @@ let printPart prefix result =
     | None -> 
         printfn "%A: Not implemented or found" prefix
     | Some ans -> 
-        printfn "%A: %A" prefix ans
+        printfn "%s: %A" prefix ans
 
 let printDay<'a, 'b> ((one,two): ('a option) * ('b option)) =
      printPart "Part one" one
