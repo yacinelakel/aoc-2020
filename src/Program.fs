@@ -2,18 +2,28 @@ open System
 open CommandLineParser
 open Days
 
-let runDay (day:int) (fileLines: seq<string>) = 
-    match day with
-    | 1 -> Day1.solve fileLines
-    | 2 -> Day2.solve fileLines
-    | _ -> (None, None)
 
-let printResult prefix result = 
+
+let printPart prefix result = 
     match result with 
     | None -> 
-        printfn "%s: Not implemented or found" prefix
+        printfn "%A: Not implemented or found" prefix
     | Some ans -> 
-        printfn "%s: %d" prefix ans
+        printfn "%A: %A" prefix ans
+
+let printDay<'a, 'b> ((one,two): ('a option) * ('b option)) =
+     printPart "Part one" one
+     printPart "Part two" two  
+
+let runDay (day:int) (fileLines: seq<string>) = 
+    match day with
+    | 1 -> 
+        fileLines |> Day1.solve |> printDay
+    | 2 -> 
+        fileLines |> Day2.solve |> printDay
+    | 3 -> 
+        fileLines |> Day3.solve |> printDay
+    | _ ->  printDay (None, None)
 
 [<EntryPoint>]
 let main argv =
@@ -27,8 +37,6 @@ let main argv =
             match cmd.FilePath with
             | NoFilePath -> eprintfn "Missing input option (-i)"
             | FilePath path -> 
-                let (partOne, partTwo) = IO.File.ReadLines path |> runDay day
-                printResult "Part one" partOne
-                printResult "Part two" partTwo  
+                IO.File.ReadLines path |> runDay day
     0 // return an integer exit code
 
