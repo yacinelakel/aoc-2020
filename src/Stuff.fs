@@ -71,9 +71,6 @@ module Graph =
     let empty = Map.empty
                  
 
-
-
-
 module Segment =
     type Point = { x: int; y: int }
     type Segment = { p1: Point; p2: Point }

@@ -7,7 +7,7 @@ open Days
 let printPart prefix result = 
     match result with 
     | None -> 
-        printfn "%A: Not implemented or found" prefix
+        printfn "%s: Not implemented or found" prefix
     | Some ans -> 
         printfn "%s: %A" prefix ans
 
@@ -23,6 +23,8 @@ let runDay (day:int) (fileLines: seq<string>) =
         fileLines |> Day2.solve |> printDay
     | 3 -> 
         fileLines |> Day3.solve |> printDay
+    | 4 -> 
+        fileLines |> Day4.solve |> printDay
     | _ ->  printDay (None, None)
 
 [<EntryPoint>]
