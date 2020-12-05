@@ -1,8 +1,8 @@
 module Days.Day1
 
-open Days.Core
+open Core
 
-let solve (fileLines: seq<string>) =
+let solve (fileLines: string list) =
 
     // Solve using reccursion
     let partOneRecursion (input) =
@@ -126,20 +126,21 @@ let solve (fileLines: seq<string>) =
         (cprod2 |> findMatch |> toResult, cprod3 |> findMatch |> toResult)
 
     // 'Optimal' solutions
-    let partTwoToSum input =
+    let partOneTwoSum input =
         let twoSum list sum =
             // Scan for canidates
             let rec search s sList =
                 match sList with
-                | [ _ ] | [] -> None
-                | a::rest ->
+                | [ _ ]
+                | [] -> None
+                | a :: rest ->
                     let b = List.last rest
                     if (a + b) = s then Some(a, b)
                     else if (a + b) > s then search s sList.[..(sList.Length - 2)]
                     else search s rest
 
             // input must be sorted
-            list |> List.sort |> search sum 
+            list |> List.sort |> search sum
 
         match (twoSum input 2020) with
         | Some (a, b) -> Some(a * b)
@@ -151,8 +152,9 @@ let solve (fileLines: seq<string>) =
             // Scan for second and third canidate
             let rec search2 s sList a =
                 match sList with
-                | [ _ ] | [] -> None
-                | b::rest ->
+                | [ _ ]
+                | [] -> None
+                | b :: rest ->
                     let c = List.last rest
                     if (a + b + c) = s then Some(a, b, c)
                     else if (a + b + c) > s then search2 s sList.[..(sList.Length - 2)] a // remove last item
@@ -162,7 +164,9 @@ let solve (fileLines: seq<string>) =
             // search for solution given that canidate
             let rec search3 s sList =
                 match sList with
-                | [ _; _ ] | [ _ ] | [] -> None
+                | [ _; _ ]
+                | [ _ ]
+                | [] -> None
                 | x :: rest ->
                     match search2 s sList x with
                     | None -> search3 s rest
@@ -175,8 +179,12 @@ let solve (fileLines: seq<string>) =
         | Some (a, b, c) -> Some(a * b * c)
         | None -> None
 
+    let toSomeStr x =
+        match x with
+        | Some d -> Some(string d)
+        | None -> None
 
+    let input = List.map (fun x -> (int x)) fileLines
 
-    let input = parseInput (fun x -> (int x)) fileLines
-
-    (partTwoToSum input, partTwoThreeSum input)
+    (partOneTwoSum input, partTwoThreeSum input)
+    |> toSomeStr2

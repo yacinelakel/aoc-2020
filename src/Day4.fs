@@ -1,6 +1,9 @@
-namespace Days
+module Days.Day4 
 
-type PassportField =
+    open System
+    open Core
+
+    type PassportField =
     | BirthYear of string
     | IssueYear of string
     | ExpirationYear of string
@@ -10,11 +13,7 @@ type PassportField =
     | PassportId of string
     | CountryId of string
 
-module Day4 =
-    open System
-    open Days.Core
-
-    let solve (filelines: seq<string>) =
+    let solve filelines =
 
         let toChucks lines =
             let chunkFolder chunks line =
@@ -26,18 +25,6 @@ module Day4 =
                     | [] -> [ [ l ] ]
 
             List.fold chunkFolder [ [] ] lines
-
-        let toPassportField line = 
-            match line with 
-            | Prefix "byr:" rest -> BirthYear rest |> Some
-            | Prefix "iyr:" rest -> IssueYear rest |> Some
-            | Prefix "eyr:" rest -> ExpirationYear rest |> Some
-            | Prefix "hgt:" rest -> Height rest |> Some
-            | Prefix "hcl:" rest -> HairColor rest |> Some
-            | Prefix "ecl:" rest -> EyeColor rest |> Some
-            | Prefix "pid:" rest -> PassportId rest |> Some
-            | Prefix "cid:" rest -> CountryId rest |> Some
-            | _ -> None 
 
         let numStrBetween (str:string) fromY toY = 
             match Int32.TryParse str with | (true, num) -> num >= fromY && num <= toY | _ -> false  
@@ -82,7 +69,18 @@ module Day4 =
             | Regex @"^(\d{9})$" [_] -> true
             | _ -> false
 
-              
+        let toPassportField line = 
+            match line with 
+            | Prefix "byr:" rest -> BirthYear rest |> Some
+            | Prefix "iyr:" rest -> IssueYear rest |> Some
+            | Prefix "eyr:" rest -> ExpirationYear rest |> Some
+            | Prefix "hgt:" rest -> Height rest |> Some
+            | Prefix "hcl:" rest -> HairColor rest |> Some
+            | Prefix "ecl:" rest -> EyeColor rest |> Some
+            | Prefix "pid:" rest -> PassportId rest |> Some
+            | Prefix "cid:" rest -> CountryId rest |> Some
+            | _ -> None 
+
         let isFieldValid field = 
             match field with 
             | BirthYear s -> byrValid s
@@ -140,7 +138,7 @@ module Day4 =
         let allRequired = chunks |> filterByHasAllFields
         let allRequiredAndValid = allRequired |> filterByAllValid
 
-        let p1 = allRequired |> List.length |> Some
-        let p2 = allRequiredAndValid |> List.length |> Some
+        let p1 = allRequired |> List.length
+        let p2 = allRequiredAndValid |> List.length
 
-        (p1, p2)
+        toSomeStr2 (p1, p2)

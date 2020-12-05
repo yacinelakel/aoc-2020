@@ -1,52 +1,53 @@
-namespace Days
+module Days.Day5
 
-module Day5 =
-    type Dir =
-        | Left
-        | Right
+open Core
 
-    let solve (filelines: seq<string>) =
+type Dir =
+    | Left
+    | Right
 
-        let rec binSearch (mFunc: 'a -> Dir) (low: int) (high: int) (list: 'a list) =
-            match list with
-            | [ a ] ->
-                match mFunc (a) with
-                | Left -> low
-                | Right -> high
-            | a :: xs ->
-                match mFunc (a) with
-                | Left ->
-                    let mid = low + (high - low) / 2
-                    binSearch mFunc low mid xs
-                | Right ->
-                    let mid = high - ((high - low) / 2)
-                    binSearch mFunc mid high xs
-            | [] -> low
+let solve filelines =
 
-        let getRow (cList: char list) =
-            binSearch (fun c -> if 'F' = c then Left else Right) 0 127 cList
+    let rec binSearch (mFunc: 'a -> Dir) (low: int) (high: int) (list: 'a list) =
+        match list with
+        | [ a ] ->
+            match mFunc (a) with
+            | Left -> low
+            | Right -> high
+        | a :: xs ->
+            match mFunc (a) with
+            | Left ->
+                let mid = low + (high - low) / 2
+                binSearch mFunc low mid xs
+            | Right ->
+                let mid = high - ((high - low) / 2)
+                binSearch mFunc mid high xs
+        | [] -> low
 
-        let getCol (cList: char List) =
-            binSearch (fun c -> if 'L' = c then Left else Right) 0 7 cList
+    let getRow (cList: char list) =
+        binSearch (fun c -> if 'F' = c then Left else Right) 0 127 cList
 
-        let getSeatId (str: string) =
-            let row = str.[0..6] |> Seq.toList |> getRow
-            let col = str.[0..7] |> Seq.toList |> getCol
-            (row * 8) + col
+    let getCol (cList: char List) =
+        binSearch (fun c -> if 'L' = c then Left else Right) 0 7 cList
 
-        let getFirstMissing seatIds =
-            let rec findFirst (seatIds: int list) =
-                match seatIds with
-                | x :: y :: rest -> if y - x <> 1 then y - 1 else findFirst (y :: rest)
-                | _ -> 0
+    let getSeatId (str: string) =
+        let row = str.[0..6] |> Seq.toList |> getRow
+        let col = str.[0..7] |> Seq.toList |> getCol
+        (row * 8) + col
 
-            seatIds |> List.sort |> findFirst
+    let getFirstMissing seatIds =
+        let rec findFirst (seatIds: int list) =
+            match seatIds with
+            | x :: y :: rest -> if y - x <> 1 then y - 1 else findFirst (y :: rest)
+            | _ -> 0
 
-        let seatIds =
-            filelines |> Seq.toList |> List.map getSeatId
+        seatIds |> List.sort |> findFirst
 
-        let p1 = seatIds |> Seq.max
+    let seatIds =
+        filelines |> Seq.toList |> List.map getSeatId
 
-        let p2 = seatIds |> getFirstMissing
+    let p1 = seatIds |> Seq.max
 
-        (Some p1, Some p2)
+    let p2 = seatIds |> getFirstMissing
+
+    toSomeStr2 (p1, p2)
