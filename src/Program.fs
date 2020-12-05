@@ -25,6 +25,8 @@ let runDay (day:int) (fileLines: seq<string>) =
         fileLines |> Day3.solve |> printDay
     | 4 -> 
         fileLines |> Day4.solve |> printDay
+    | 5 -> 
+        fileLines |> Day5.solve |> printDay
     | _ ->  printDay (None, None)
 
 [<EntryPoint>]
