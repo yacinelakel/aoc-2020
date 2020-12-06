@@ -19,3 +19,14 @@ let toSomeStrOption (x: 'a option) =
     | None -> None
 
 let toSomeStr2 (a, b) = (toSomeStr a, toSomeStr b)
+
+let split (seperator:'a) (list: 'a list):('a list list) =
+    let folder x state =
+        if x = seperator then
+            [] :: state
+        else
+            match state with
+            | head :: tail -> (x :: head) :: tail
+            | [] -> [ [ x ] ]
+
+    List.foldBack folder list [ [] ]

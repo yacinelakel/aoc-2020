@@ -15,17 +15,6 @@ module Days.Day4
 
     let solve filelines =
 
-        let toChucks lines =
-            let chunkFolder chunks line =
-                match line with
-                | "" -> [] :: chunks
-                | l ->
-                    match chunks with
-                    | x :: xs -> ([ l ] @ x) :: xs
-                    | [] -> [ [ l ] ]
-
-            List.fold chunkFolder [ [] ] lines
-
         let numStrBetween (str:string) fromY toY = 
             match Int32.TryParse str with | (true, num) -> num >= fromY && num <= toY | _ -> false  
 
@@ -133,7 +122,7 @@ module Days.Day4
             chunks |> List.filter isValidChunk
 
 
-        let chunks = filelines |> Seq.toList |> toChucks
+        let chunks = split "" filelines
 
         let allRequired = chunks |> filterByHasAllFields
         let allRequiredAndValid = allRequired |> filterByAllValid
