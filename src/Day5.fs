@@ -35,18 +35,17 @@ let solve filelines =
         let col = str.[0..7] |> Seq.toList |> getCol
         (row * 8) + col
 
-    let getFirstMissing seatIds =
-        let rec findFirst (seatIds: int list) =
-            match seatIds with
+    let getFirstMissing list =
+        let rec findFirst list =
+            match list with
             | x :: y :: rest -> if y - x <> 1 then y - 1 else findFirst (y :: rest)
             | _ -> 0
 
-        seatIds |> List.sort |> findFirst
+        list |> List.sort |> findFirst
 
-    let seatIds =
-        filelines |> Seq.toList |> List.map getSeatId
+    let seatIds = filelines |> List.map getSeatId
 
-    let p1 = seatIds |> Seq.max
+    let p1 = seatIds |> List.max
 
     let p2 = seatIds |> getFirstMissing
 
