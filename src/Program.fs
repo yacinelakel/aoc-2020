@@ -21,6 +21,7 @@ let getDay day =
     | 4 -> Day4.solve
     | 5 -> Day5.solve
     | 6 -> Day6.solve
+    | 7 -> Day7.solve
     | _ -> (fun _ -> (None, None))
 
 let runDay day fileLines = 
