@@ -29,7 +29,7 @@ let solve fileLines =
 
     let traverse right down list = traverseRec right down list 0 0L
 
-    let partOne input = traverseHO 3 1 input |> string |> Some
+    let partOne input = traverseHO 3 1 input 
 
     let partTwo input =
         let slopes =

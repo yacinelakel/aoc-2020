@@ -19,6 +19,8 @@ let toSomeStrOption (x: 'a option) =
     | None -> None
 
 let toSomeStr2 (a, b) = (toSomeStr a, toSomeStr b)
+let toSomeStr2Option (a, b) = (toSomeStrOption a, toSomeStrOption b)
+
 
 let split (seperator:'a) (list: 'a list):('a list list) =
     let folder x state =

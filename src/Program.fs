@@ -25,6 +25,14 @@ let getDay day =
     | 8 -> Day8.solve
     | _ -> (fun _ -> (None, None))
 
+let benchmark f = 
+    let timer = Diagnostics.Stopwatch()
+    timer.Start()
+    let returnValue = f()
+    timer.Stop()
+    printfn "Elapsed Time: %f s" timer.Elapsed.TotalSeconds
+    returnValue 
+
 let runDay day fileLines = 
     day
     |> getDay 
@@ -43,6 +51,6 @@ let main argv =
             match cmd.FilePath with
             | NoFilePath -> eprintfn "Missing input option (-i)"
             | FilePath path -> 
-                IO.File.ReadLines path |> Seq.toList |> runDay day
+                IO.File.ReadLines path |> Seq.toList |> (fun l -> benchmark (fun () -> runDay day l )) 
     0 // return an integer exit code
 

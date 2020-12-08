@@ -93,7 +93,6 @@ let solve filelines =
 
         tryFix 0 instructions
 
-
     let instructions = parse filelines
     let (p1, _) = run instructions
     let (p2, _) = runUntilTerminated instructions

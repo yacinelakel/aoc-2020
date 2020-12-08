@@ -179,12 +179,8 @@ let solve (fileLines: string list) =
         | Some (a, b, c) -> Some(a * b * c)
         | None -> None
 
-    let toSomeStr x =
-        match x with
-        | Some d -> Some(string d)
-        | None -> None
 
     let input = List.map (fun x -> (int x)) fileLines
 
     (partOneTwoSum input, partTwoThreeSum input)
-    |> toSomeStr2
+    |> toSomeStr2Option
