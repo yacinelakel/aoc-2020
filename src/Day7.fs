@@ -54,8 +54,7 @@ let solve fileline =
 
     let shinyGold = { Shade = "shiny"; Color = "gold" }
 
-    let p1 =
-        shinyGold |> getParents rulesMap |> Set.count
+    let p1 = shinyGold |> getParents rulesMap |> Set.count
 
     let p2 = shinyGold |> getChildBagCnt rulesMap
 
