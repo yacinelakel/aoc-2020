@@ -80,6 +80,7 @@ let solve filelines =
     let changeInstruction inst =
             if inst.op = Noop then { inst with op = Jump } else { inst with op = Noop }
 
+    // Bruteforce implementation
     let runUntilTerminated (instructions: Instruction list) =
         let rec tryFix (i: int) (iList: Instruction list) =
             let inst = iList.[i]
@@ -93,12 +94,11 @@ let solve filelines =
 
         tryFix 0 instructions
 
-    // ---------------------------------------------------
     let getEdges (iList:Instruction list) = 
         let folder acc inst = 
             let (edges,edgesRev, canEdges) = acc
             let i = inst.id
-            let (too, from) = 
+            let (f, t) = 
                 match inst.op with
                 | Acc | Noop -> (i, (i + 1))
                  | Jump -> (i, (jump inst.id inst.sign inst.num))
@@ -107,8 +107,8 @@ let solve filelines =
                 | Acc -> canEdges
                 | Noop -> canEdges @ [(i, (jump i inst.sign inst.num))]
                 | Jump -> canEdges @ [(i, (i + 1))]
-            let edgesRev' = Map.change from (fun v -> match v with | Some a -> Some (too::a) | None -> Some [too] ) edgesRev
-            (Map.add too from edges, edgesRev', canEdges')
+            let edgesRev' = Map.change t (fun v -> match v with | Some a -> Some (f::a) | None -> Some [f] ) edgesRev
+            (Map.add f t edges, edgesRev', canEdges')
         
         List.fold folder (Map.empty, Map.empty, []) iList
 
@@ -139,30 +139,50 @@ let solve filelines =
      
     let rec findChangeRec (s1:Set<int>) (s2:Set<int>) edges =
         match edges with
-        | (t, f)::xs -> 
-            if (s1.Contains t) && (s2.Contains f) then Some (t,f) else 
+        | (f, t)::xs -> 
+            if (s1.Contains f) && (s2.Contains t) then Some (f,t) else 
                 findChangeRec s1 s2 xs
         | [] -> None 
         
 
     let instructions = parse filelines
     let (p1, _) = run instructions
-    // let (p2,nList) = runUntilTerminated instructions
 
-    let (edges, edgesRev, canidateEdges) = getEdges instructions
+    // Brute force solution
+    // let (p2,_) = runUntilTerminated instructions
+
+
+    // Solution using graph representation of the instructions
+    // edges: All edges in the graph
+    // edgesRev: The reverse of the all the edges in the graph
+    // canadiateEdges: All edges that can be added to the graph (all possible jmp and nop changes)
+    // Runtime: O(n)
+    let (edges, edgesRev, canidateEdges) = getEdges instructions 
+    
+    // Since each node in the graph has only one edge out of a node, 
+    // then we can simply traverse from the start to get all nodes in 
+    // the subgraph S1
+    // Runtime: O(n)
     let s1 = traverse edges 0
+
+    // Since we reversed all the edges, we need to run bfs from
+    // the last node (n + 1) to find all the nodes in the graph S2
+    // Runtime: In this graph, the number of edges is the same as
+    // the number of nodes, so O(n)
     let s2 = bfs edgesRev instructions.Length
     
+    // The instruction that needs to be changed is the the same as 
+    // the 'from' node in the edge that allows you to go from S1 to S2
     let edge = findChangeRec s1 s2 canidateEdges
+
+    // Change the instruction and run part one
     let p2 = 
         match edge with 
         | None -> None
-        | Some (t,f) -> 
+        | Some (from,_) -> 
             instructions 
-            |> updateElement t (changeInstruction)
+            |> updateElement from (changeInstruction)
             |> run
             |> Some 
 
     toSomeStr2 (p1, p2)
-
-    // toSomeStr2 (p1, p2)
