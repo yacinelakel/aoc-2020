@@ -77,10 +77,10 @@ let solve filelines =
         list
         |> List.mapi (fun i' v -> if i = i' then f v else v)
 
-    let runUntilTerminated (instructions: Instruction list) =
-        let changeInstruction inst =
+    let changeInstruction inst =
             if inst.op = Noop then { inst with op = Jump } else { inst with op = Noop }
 
+    let runUntilTerminated (instructions: Instruction list) =
         let rec tryFix (i: int) (iList: Instruction list) =
             let inst = iList.[i]
             match inst.op with
@@ -93,8 +93,76 @@ let solve filelines =
 
         tryFix 0 instructions
 
-    let instructions = parse filelines
-    let (p1, _) = run instructions
-    let (p2, _) = runUntilTerminated instructions
+    // ---------------------------------------------------
+    let getEdges (iList:Instruction list) = 
+        let folder acc inst = 
+            let (edges,edgesRev, canEdges) = acc
+            let i = inst.id
+            let (too, from) = 
+                match inst.op with
+                | Acc | Noop -> (i, (i + 1))
+                | Jump -> (i, (jump inst.id inst.sign inst.num))
+            let canEdges' = 
+                match inst.op with
+                | Acc -> canEdges
+                | Noop -> canEdges @ [(i, (jump i inst.sign inst.num))]
+                | Jump -> canEdges @ [(i, (i + 1))]
+            let edgesRev' = Map.change from (fun v -> match v with | Some a -> Some (too::a) | None -> Some [too] ) edgesRev
+            (Map.add too from edges, edgesRev', canEdges')
+        
+        List.fold folder (Map.empty, Map.empty, []) iList
 
-    toSomeStr2 (p1, p2)
+    let traverse (map:Map<int, int>) (pos:int) = 
+        let rec traverseRec (visited:Set<int>) i (map:Map<int,int>) = 
+            if visited.Contains i then visited 
+            else
+                let visited' = visited.Add i
+                if not (map.ContainsKey i) then visited' 
+                else traverseRec visited' map.[i] map
+        
+        traverseRec Set.empty pos map 
+
+    let bfs map root = 
+        let rec bfsRec (map:Map<int,int list>) queue (visited:Set<int>) =
+            match queue with
+            | [] -> visited
+            | x::xs ->
+                let visited = visited.Add x
+                if map.ContainsKey x then
+                    let edges = map.[x] 
+                    let unvisited = List.filter (visited.Contains >> not) edges
+                    bfsRec map (xs @ unvisited) visited
+                else 
+                    bfsRec map xs visited
+
+        bfsRec  map [root] Set.empty 
+     
+    let rec findChangeRec (s1:Set<int>) (s2:Set<int>) edges =
+        match edges with
+        | (t, f)::xs -> 
+            if (s1.Contains t) && (s2.Contains f) then Some (t,f) else 
+                findChangeRec s1 s2 xs
+        | [] -> None 
+        
+
+    let instructions = parse filelines
+    // let (p1, _) = run instructions
+    let (p2,nList) = runUntilTerminated instructions
+
+    let (edges, edgesRev, canidateEdges) = getEdges instructions
+    let s1 = traverse edges 0
+    let s2 = bfs edgesRev instructions.Length
+    
+    let edge = findChangeRec s1 s2 canidateEdges
+    let p2 = 
+        match edge with 
+        | None -> None
+        | Some (t,f) -> 
+            instructions 
+            |> updateElement t (changeInstruction)
+            |> run
+            |> Some 
+
+    toSomeStr2 (0, p2)
+
+    // toSomeStr2 (p1, p2)
