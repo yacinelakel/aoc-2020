@@ -31,14 +31,14 @@ let benchmark f =
     timer.Start()
     let returnValue = f()
     timer.Stop()
+    logDay returnValue 
     printfn "Elapsed Time: %f s" timer.Elapsed.TotalSeconds
-    returnValue 
+    
 
 let runDay day fileLines = 
     day
     |> getDay 
     <| fileLines 
-    |> logDay
 
 [<EntryPoint>]
 let main argv =
