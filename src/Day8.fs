@@ -101,7 +101,7 @@ let solve filelines =
             let (too, from) = 
                 match inst.op with
                 | Acc | Noop -> (i, (i + 1))
-                | Jump -> (i, (jump inst.id inst.sign inst.num))
+                 | Jump -> (i, (jump inst.id inst.sign inst.num))
             let canEdges' = 
                 match inst.op with
                 | Acc -> canEdges
@@ -146,8 +146,8 @@ let solve filelines =
         
 
     let instructions = parse filelines
-    // let (p1, _) = run instructions
-    let (p2,nList) = runUntilTerminated instructions
+    let (p1, _) = run instructions
+    // let (p2,nList) = runUntilTerminated instructions
 
     let (edges, edgesRev, canidateEdges) = getEdges instructions
     let s1 = traverse edges 0
@@ -163,6 +163,6 @@ let solve filelines =
             |> run
             |> Some 
 
-    toSomeStr2 (0, p2)
+    toSomeStr2 (p1, p2)
 
     // toSomeStr2 (p1, p2)
