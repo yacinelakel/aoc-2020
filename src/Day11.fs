@@ -1,13 +1,17 @@
 module Days.Day11
+
 open Core
 
-type Cell = | Floor | Empty | Occupied 
+type Cell =
+    | Floor
+    | Empty
+    | Occupied
 
-let solve (filelines: string list) = 
+let solve (filelines: string list) =
 
-    let parseLines lines: (Cell list list) = 
+    let parseLines lines: (Cell list list) =
         let parseChar c =
-            match c with 
+            match c with
             | '.' -> Floor
             | 'L' -> Empty
             | '#' -> Occupied
@@ -15,112 +19,108 @@ let solve (filelines: string list) =
 
         let parseLine line = line |> Seq.toList |> List.map parseChar
 
-        lines |>List.map parseLine 
+        lines |> List.map parseLine
 
+    let tryGet grid (i, j) =
+        match List.tryItem i grid with
+        | Some l -> List.tryItem j l
+        | None -> None
 
-    let getUp i j (grid:Cell list list) = if (i = 0) then None else Some grid.[i - 1].[j]
-    let getDown i j (grid:Cell list list) = if (i = grid.Length - 1) then None else Some grid.[i + 1].[j]
-    let getLeft i j (grid:Cell list list) = if (j = 0) then None else Some grid.[i].[j - 1]
-    let getRight i j (grid:Cell list list) = if (j = grid.[i].Length - 1) then None else Some grid.[i].[j + 1]
-    let getTopLeft i j (grid:Cell list list) = if (i = 0 || j = 0 ) then None else Some grid.[i - 1].[j - 1] 
-    let getTopRight i j (grid:Cell list list) = if (i = 0 || j = grid.[i].Length - 1 ) then None else Some grid.[i - 1].[j + 1] 
-    let getBottomLeft i j (grid:Cell list list) = if (i = grid.Length - 1 || j = 0 ) then None else Some grid.[i + 1].[j - 1] 
-    let getBottomRight i j (grid:Cell list list) = if (i = grid.Length - 1 || j = grid.[i].Length - 1 ) then None else Some grid.[i + 1].[j + 1] 
-    
-    let updateGrid (f:int -> int -> Cell list list -> Cell) (grid:Cell list list) =
-            grid |> List.mapi (fun i v -> List.mapi (fun j _ -> f i j grid ) v)
+    let rec tryGetRec f grid (pos: int * int) =
+        let nPos = f pos
+        match tryGet grid pos with
+        | Some c as cell ->
+            match c with
+            | Floor -> tryGetRec f grid nPos
+            | _ -> cell
+        | None -> None
 
-    let countOccupied grid = 
-            let folder = List.fold (fun acc c -> if c = Occupied then acc + 1 else acc) 0 
-            List.sumBy folder grid
+    let getUp (i, j) = (i - 1, j)
+    let getDown (i, j) = (i + 1, j)
+    let getLeft (i, j) = (i, (j - 1))
+    let getRight (i, j) = (i, (j + 1))
+    let getTopLeft = getUp >> getLeft
+    let getTopRight = getUp >> getRight
+    let getBottomLeft = getDown >> getLeft
+    let getBottomRight = getDown >> getRight
 
-    let grid = parseLines filelines 
+    let dList =
+        [ getUp
+          getDown
+          getRight
+          getLeft
+          getTopLeft
+          getTopRight
+          getBottomLeft
+          getBottomRight ]
 
-    let partOne (grid:Cell list list) =
-        
-        let getAdj i j (grid:Cell list list) = 
-            let dList = [getUp;getDown;getRight;getLeft;getTopLeft;getTopRight;getBottomLeft;getBottomRight];
-            dList |> List.map (fun f -> f i j grid) |> List.choose id
+    let updateGrid f grid =
+        List.mapi (fun i v -> List.mapi (fun j _ -> f i j grid) v) grid
 
-        let changeSeat i j (grid:Cell list list) = 
+    let countOccupied grid =
+        let folder =
+            List.fold (fun acc c -> if c = Occupied then acc + 1 else acc) 0
+
+        List.sumBy folder grid
+
+    let countOccupiedAdj adj =
+        adj
+        |> List.filter (fun x -> x = Occupied)
+        |> List.length
+
+    let rec simulate f grid =
+        let newGrid = updateGrid f grid
+        if newGrid = grid then countOccupied grid else simulate f newGrid
+
+    let partOne (grid: Cell list list) =
+
+        let getAdj pos (grid: Cell list list) =
+            dList
+            |> List.map (fun f -> f pos |> tryGet grid)
+            |> List.choose id
+
+        let changeSeat i j (grid: Cell list list) =
             let cell = grid.[i].[j]
             match cell with
-            | Empty -> 
-                let hasNoOccupied = getAdj i j grid |> List.contains Occupied |> not
-                if hasNoOccupied then Occupied else cell
-            | Occupied -> 
-                let numOccupied = getAdj i j grid |> List.filter (fun x -> x = Occupied) |> List.length
-                if numOccupied >= 4 then Empty else cell
+            | Empty ->
+                let adj = getAdj (i, j) grid
+                match countOccupiedAdj adj with
+                | 0 -> Occupied
+                | _ -> cell
+            | Occupied ->
+                let adj = getAdj (i, j) grid
+                match (countOccupiedAdj adj) >= 4 with
+                | true -> Empty
+                | false -> cell
             | Floor -> cell
-        
-        let rec shuffle grid = 
-            let newGrid = updateGrid changeSeat grid
-            if newGrid = grid then countOccupied grid
-            else shuffle newGrid 
 
-        shuffle grid
+        simulate changeSeat grid
 
-    let partTwo (grid:Cell list list) = 
-        let rec getUpRec i j grid = 
-            match getUp i j grid with 
-            | Some c -> match c with | Floor -> getUpRec (i - 1) j grid | _ -> Some c
-            | None -> None
-        
-        let rec getDownRec i j grid = 
-            match getDown i j grid with 
-            | Some c -> match c with | Floor -> getDownRec (i + 1) j grid | _ -> Some c
-            | None -> None
+    let partTwo (grid: Cell list list) =
 
-        let rec getLeftRec i j grid = 
-            match getLeft i j grid with 
-            | Some c -> match c with | Floor -> getLeftRec i (j - 1) grid | _ -> Some c
-            | None -> None
+        let getAdj pos (grid: Cell list list) =
+            dList
+            |> List.map (fun f -> tryGetRec f grid pos)
+            |> List.choose id
 
-        let rec getRightRec i j grid = 
-            match getRight i j grid with 
-            | Some c -> match c with | Floor -> getRightRec i (j + 1) grid | _ -> Some c
-            | None -> None
-        
-        let rec getTopLeftRec i j grid = 
-            match getTopLeft i j grid with 
-            | Some c -> match c with | Floor -> getTopLeftRec (i - 1) (j - 1) grid | _ -> Some c
-            | None -> None
-        
-        let rec getTopRightRec i j grid = 
-            match getTopRight i j grid with 
-            | Some c -> match c with | Floor -> getTopRightRec (i - 1) (j + 1) grid | _ -> Some c
-            | None -> None
-        
-        let rec getBottomLeftRec i j grid = 
-            match getBottomLeft i j grid with 
-            | Some c -> match c with | Floor -> getBottomLeftRec (i + 1) (j - 1) grid | _ -> Some c
-            | None -> None
-
-        let rec getBottomRightRec i j grid = 
-            match getBottomRight i j grid with 
-            | Some c -> match c with | Floor -> getBottomRightRec (i + 1) (j + 1) grid | _ -> Some c
-            | None -> None
-
-        let getAdj i j (grid:Cell list list) = 
-            let dList = [getUpRec;getDownRec;getRightRec;getLeftRec;getTopLeftRec;getTopRightRec;getBottomLeftRec;getBottomRightRec];
-            dList |> List.map (fun f -> f i j grid) |> List.choose id
-
-        let changeSeat i j (grid:Cell list list) = 
+        let changeSeat i j (grid: Cell list list) =
             let cell = grid.[i].[j]
             match cell with
-            | Empty -> 
-                let hasNoOccupied = getAdj i j grid |> List.contains Occupied |> not
-                if hasNoOccupied then Occupied else cell
-            | Occupied -> 
-                let numOccupied = getAdj i j grid |> List.filter (fun x -> x = Occupied) |> List.length
-                if numOccupied >= 5 then Empty else cell
+            | Empty ->
+                let adj = getAdj (i, j) grid
+                match countOccupiedAdj adj with
+                | 0 -> Occupied
+                | _ -> cell
+
+            | Occupied ->
+                let adj = getAdj (i, j) grid
+                match (countOccupiedAdj adj) >= 5 with
+                | true -> Empty
+                | false -> cell
             | Floor -> cell
 
-        let rec shuffle grid = 
-            let newGrid = updateGrid changeSeat grid
-            if newGrid = grid then countOccupied grid
-            else shuffle newGrid 
-
-        shuffle grid
+        simulate changeSeat grid
+        
+    let grid = parseLines filelines
 
     toSomeStr2 (partOne grid, partTwo grid)
