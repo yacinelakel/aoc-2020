@@ -29,6 +29,7 @@ let getDay day =
     | 12 -> Day12.solve
     | 13 -> Day13.solve
     | 14 -> Day14.solve
+    | 15 -> Day15.solve
     | _ -> (fun _ -> (None, None))
 
 let benchmark f = 
