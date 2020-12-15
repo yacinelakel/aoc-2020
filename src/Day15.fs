@@ -2,45 +2,34 @@ module Days.Day15
 
 open Core
 open System
-
-type Spoken =
-    | FirstTime of int
-    | LastTwoTimes of int * int
-
+open System.Collections.Generic
 
 let solve (filelines: string list) =
-    let findNthNumber n numList =
-        let findNthNumber (lastSpoken, spokenMap) turn =
-            let curSpoken =
-                    match Map.find lastSpoken spokenMap with
-                    | FirstTime _ -> 0
-                    | LastTwoTimes (t1, t2) -> t1 - t2
 
+    let findNthNumber n nList =
+
+        let mutable dict = new Dictionary<int, int>()
+        nList 
+        |> List.mapi (fun i x -> dict.[x] <- i + 1)
+        |> ignore
+
+        let rec findNthNumber lastSpoken turn =
             let newSpoken =
-                match Map.tryFind curSpoken spokenMap with
-                | Some s ->
-                    match s with
-                    | FirstTime ft -> LastTwoTimes(turn, ft)
-                    | LastTwoTimes (t1, _) -> LastTwoTimes(turn, t1)
-                | None -> (FirstTime turn)
+                match dict.ContainsKey(lastSpoken) with
+                | true -> turn - dict.[lastSpoken]
+                | false -> 0
 
-            (curSpoken, Map.add curSpoken newSpoken spokenMap)
+            if n = turn then
+                lastSpoken
+            else
+                dict.[lastSpoken] <- turn
+                findNthNumber newSpoken (turn + 1)
 
-        let ls, map =
-            List.last numList,
-            numList
-            |> List.mapi (fun i x -> (x, FirstTime(i + 1)))
-            |> Map.ofList
+        findNthNumber 0 (List.length nList |> (+) 1)
 
-        let (ans, _) =
-             [(List.length numList + 1) .. n ]
-            |> List.fold findNthNumber (ls, map)
-
-        ans
-
-    let nums =
+    let nList =
         filelines.[0].Split(',', StringSplitOptions.RemoveEmptyEntries)
         |> Array.toList
         |> List.map int
 
-    toSomeStr2 (findNthNumber 2020 nums, findNthNumber 30000000 nums)
+    toSomeStr2 (findNthNumber 2020 nList, findNthNumber 30000000 nList)
